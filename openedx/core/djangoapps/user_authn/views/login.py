@@ -37,6 +37,7 @@ from openedx.core.djangoapps.util.user_messages import PageLevelMessages
 from openedx.core.djangoapps.user_authn.views.password_reset import send_password_reset_email_for_user
 from openedx.core.djangoapps.user_authn.config.waffle import ENABLE_LOGIN_USING_THIRDPARTY_AUTH_ONLY
 from openedx.core.djangolib.markup import HTML, Text
+from openedx.core.djangoapps import giap
 from openedx.core.lib.api.view_utils import require_post_params
 from student.helpers import get_next_url_for_login_page
 from student.models import LoginFailures, AllowedAuthUser, UserProfile
@@ -444,6 +445,8 @@ def login_user(request):
         set_custom_metric('login_user_auth_failed_error', False)
         set_custom_metric('login_user_response_status', response.status_code)
         set_custom_metric('login_user_redirect_url', redirect_url)
+
+        giap.track(user.id, "sign-in", {"email": user.email})
         return response
     except AuthFailedError as error:
         log.exception(error.get_response())

@@ -35,6 +35,7 @@ import third_party_auth
 # Note that this lives in LMS, so this dependency should be refactored.
 # TODO Have the discussions code subscribe to the REGISTER_USER signal instead.
 from lms.djangoapps.discussion.notification_prefs.views import enable_notifications
+from openedx.core.djangoapps import giap
 from openedx.core.djangoapps.lang_pref import LANGUAGE_KEY
 from openedx.core.djangoapps.site_configuration import helpers as configuration_helpers
 from openedx.core.djangoapps.user_api import accounts as accounts_settings
@@ -492,6 +493,8 @@ class RegistrationView(APIView):
 
         response = self._create_response(request, {}, status_code=200)
         set_logged_in_cookies(request, response, user)
+
+        giap.track(user.id, "sign-up", {"email": user.email})
         return response
 
     def _handle_duplicate_email_username(self, request, data):
